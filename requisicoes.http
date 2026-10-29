@@ -1,0 +1,37 @@
+### Listar
+GET http://localhost:8080/itens
+Accept: application/json
+
+### Cadastrar
+POST http://localhost:8080/itens
+Content-Type: application/json
+Accept: application/json
+
+{"nome": "Teclado", "quantidade": 10, "preco": 120.0}
+
+### Buscar por ID
+GET http://localhost:8080/itens/1
+
+### Filtrar
+GET http://localhost:8080/itens?nome=tecla
+
+### Atualizar (todos os campos)
+PUT http://localhost:8080/itens/1
+Content-Type: application/json
+
+{"nome": "Teclado Atualizado", "quantidade": 10, "preco": 120.0}
+
+### Excluir
+DELETE http://localhost:8080/itens/1
+
+### Inválido: 400
+POST http://localhost:8080/itens
+Content-Type: application/json
+
+{}
+
+### Atualização parcial
+PATCH http://localhost:8080/itens/1/quantidade
+Content-Type: application/json
+
+{"quantidade": 25}
