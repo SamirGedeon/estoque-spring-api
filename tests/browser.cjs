@@ -28,6 +28,9 @@ const fs = require('node:fs');
    assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
    await page.screenshot({path:`artifacts/estoque-${width}.png`,fullPage:true});
   }
+  await page.setViewportSize({width:1200,height:800});
+  await page.evaluate(() => window.scrollTo(0,0));
+  console.log('PORTFOLIO_IMAGE estoque-capa.png ' + (await page.screenshot()).toString('base64'));
   await page.getByRole('button',{name:'Excluir Teclado de demonstração',exact:true}).click();
   await page.locator('#delete-dialog button[value="cancel"]').click();
   assert.equal(await page.locator('#items tr').count(),1);
