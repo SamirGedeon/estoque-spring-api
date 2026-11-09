@@ -3,3 +3,10 @@ target/
 *.iml
 .env
 *.log
+
+dados/
+*.mv.db
+*.trace.db
+
+node_modules/
+artifacts/

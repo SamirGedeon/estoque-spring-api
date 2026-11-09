@@ -1,0 +1,58 @@
+name: Verificar estoque
+on: [push, pull_request, workflow_dispatch]
+permissions:
+  contents: read
+jobs:
+  verificar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+          cache: maven
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: ./mvnw -B test package
+      - run: npm install
+      - run: npx playwright install --with-deps chromium
+      - name: Iniciar aplicação
+        run: |
+          java -jar target/estoque-spring-api-1.0.0.jar > /tmp/estoque.log 2>&1 &
+          echo $! > /tmp/estoque.pid
+          for attempt in $(seq 1 60); do
+            if curl -fsS http://localhost:8080/itens; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/estoque.log
+          exit 1
+      - run: npm test
+      - name: Verificar persistência após reinício
+        run: |
+          curl -fsS -H 'Content-Type: application/json' -d '{"nome":"Teste de reinicio","quantidade":2,"preco":19.90}' http://localhost:8080/itens > /tmp/item.json
+          kill $(cat /tmp/estoque.pid)
+          for attempt in $(seq 1 30); do
+            if ! kill -0 $(cat /tmp/estoque.pid) 2>/dev/null; then break; fi
+            sleep 1
+          done
+          java -jar target/estoque-spring-api-1.0.0.jar > /tmp/estoque-reinicio.log 2>&1 &
+          for attempt in $(seq 1 60); do
+            if curl -fsS http://localhost:8080/itens > /tmp/itens.json; then break; fi
+            sleep 1
+          done
+          python3 - <<'PY'
+          import json
+          item = json.load(open('/tmp/item.json'))
+          itens = json.load(open('/tmp/itens.json'))
+          assert any(x['id'] == item['id'] and x['nome'] == item['nome'] and x['quantidade'] == 2 for x in itens)
+          print('Persistência após reinício confirmada')
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: verificacao-estoque
+          path: |
+            artifacts/
+            target/surefire-reports/
