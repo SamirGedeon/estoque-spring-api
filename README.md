@@ -1,5 +1,7 @@
 # Controle de estoque
 
+![Painel real do estoque](docs/portfolio/estoque-capa.png)
+
 Projeto de estudo e portfólio com painel web e API REST em Java 17 / Spring Boot. Permite cadastrar produtos, buscar por nome, editar preços e quantidades e excluir itens após confirmação.
 
 O painel também calcula o número de produtos, as unidades disponíveis e o valor total do estoque. A interface usa HTML, CSS e JavaScript, sem framework frontend.
